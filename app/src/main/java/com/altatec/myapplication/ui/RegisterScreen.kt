@@ -1,16 +1,17 @@
 package com.altatec.myapplication.ui
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,15 +31,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.altatec.myapplication.R
+import com.altatec.myapplication.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterScreen() {
+fun RegisterScreen(navigateToLogin: () -> Unit) {
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
@@ -51,9 +56,12 @@ fun RegisterScreen() {
     var password by remember { mutableStateOf("") }
     var passwordError by remember { mutableStateOf(false) }
     var passwordSuppText by remember { mutableStateOf("") }
+    var passwordVisibility by remember { mutableStateOf(false) }
     var confirmPassword by remember { mutableStateOf("") }
     var confirmPasswordError by remember { mutableStateOf(false) }
     var confirmPasswordSuppText by remember { mutableStateOf("") }
+    var confirmPasswordVisibility by remember { mutableStateOf(false) }
+    var registerEnabled by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -72,7 +80,9 @@ fun RegisterScreen() {
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { /* do something */ }) {
+                    IconButton(onClick = {
+                        navigateToLogin()
+                    }) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
                             contentDescription = "backNavigation"
@@ -87,12 +97,12 @@ fun RegisterScreen() {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
-                .padding(32.dp),
+                .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(
                 modifier = Modifier
-                    .height(8.dp)
+                    .height(16.dp)
             )
             Text(
                 text = "Register New Account",
@@ -123,6 +133,7 @@ fun RegisterScreen() {
                     Text(text = nameSuppText)
                 },
                 isError = nameError,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 maxLines = 1
             )
             OutlinedTextField(
@@ -145,6 +156,7 @@ fun RegisterScreen() {
                     Text(text = emailSuppText)
                 },
                 isError = emailError,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 maxLines = 1,
             )
             OutlinedTextField(
@@ -158,15 +170,27 @@ fun RegisterScreen() {
                     Text(text = "Password")
                 },
                 trailingIcon = {
-                    Icon(
-                        imageVector = Icons.Filled.Lock,
-                        contentDescription = "Password"
-                    )
+                    val toggle = if (passwordVisibility)
+                        R.drawable.baseline_visibility_24
+                    else
+                        R.drawable.baseline_visibility_off_24
+                    IconButton(
+                        onClick = {
+                            passwordVisibility = passwordVisibility != true
+                        }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = toggle),
+                            contentDescription = if (passwordVisibility) "Hide password"
+                            else "Show password"
+                        )
+                    }
                 },
                 supportingText = {
                     Text(text = passwordSuppText)
                 },
                 isError = passwordError,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 maxLines = 1
             )
             OutlinedTextField(
@@ -180,27 +204,40 @@ fun RegisterScreen() {
                     Text(text = "Confirm Password")
                 },
                 trailingIcon = {
-                    Icon(
-                        imageVector = Icons.Filled.Lock,
-                        contentDescription = "Password"
-                    )
+                    val toggle = if (confirmPasswordVisibility)
+                        R.drawable.baseline_visibility_24
+                    else
+                        R.drawable.baseline_visibility_off_24
+                    IconButton(
+                        onClick = {
+                            confirmPasswordVisibility = confirmPasswordVisibility != true
+                        }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = toggle),
+                            contentDescription = if (confirmPasswordVisibility) "Hide password"
+                            else "Show password"
+                        )
+                    }
                 },
                 supportingText = {
                     Text(text = confirmPasswordSuppText)
                 },
                 isError = confirmPasswordError,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 maxLines = 1,
             )
             Spacer(
                 modifier = Modifier
-                    .height(80.dp)
+                    .height(96.dp)
             )
             Button(
                 onClick = {
-                /*TODO*/
+                    /*TODO register*/
                 },
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth(),
+                enabled = registerEnabled
             ) {
                 Text(text = "REGISTER")
             }
@@ -208,8 +245,10 @@ fun RegisterScreen() {
     }
 }
 
-@Preview
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
 fun RegisterPrev() {
-    RegisterScreen()
+    AppTheme {
+        RegisterScreen {}
+    }
 }
