@@ -1,11 +1,15 @@
-package com.altatec.myapplication.ui
+package com.altatec.myapplication
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.altatec.myapplication.Screen
+import com.altatec.myapplication.ui.LoginScreen
+import com.altatec.myapplication.ui.RegisterScreen
+import com.altatec.myapplication.ui.ScaffoldScreen
+import com.altatec.myapplication.ui.Screen
+import com.altatec.myapplication.ui.SplashScreen
 
 @Composable
 fun AppNavigation(
@@ -33,7 +37,7 @@ fun AppNavigation(
             }
         }
         composable(route= Screen.ScaffoldScreen.route){
-            ScaffoldScreen(navController = navController)
+            ScaffoldScreen()
         }
     }
 }

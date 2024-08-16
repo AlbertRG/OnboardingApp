@@ -3,7 +3,6 @@ package com.altatec.myapplication.ui
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -33,24 +33,24 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.altatec.myapplication.ScaffoldViewModel
-import com.altatec.myapplication.screensInBottom
+import com.altatec.myapplication.viewmodel.ScaffoldViewModel
 import com.altatec.myapplication.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScaffoldScreen(navController: NavHostController) {
-
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+fun ScaffoldScreen() {
 
     val scaffoldViewModel: ScaffoldViewModel = viewModel()
     val currentScreen by remember { scaffoldViewModel.currentScreen }
-    val title by remember { mutableStateOf(currentScreen.bTitle) }
 
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    var currentRoute: String? = "home_screen"
+    val navController: NavHostController = rememberNavController()
+    var currentRoute by remember { mutableStateOf("home_screen") }
+    var title by remember { mutableStateOf(currentScreen.bTitle) }
+
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -82,31 +82,31 @@ fun ScaffoldScreen(navController: NavHostController) {
                 screensInBottom.forEach { item ->
                     BottomBarItem(
                         selected = currentRoute == item.bRoute,
-                        clicked = {
-                            navController.navigate(item.bRoute)
-                            currentRoute = navBackStackEntry?.destination?.route
-                        },
                         title = item.bTitle,
-                        drawable = item.icon
+                        drawable = item.icon,
+                        clicked = {
+                            title = item.bTitle
+                            currentRoute = item.bRoute
+                            navController.navigate(item.bRoute)
+                        }
                     )
                 }
             }
         }
     ) {
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(it)
+                .padding(it),
+            verticalArrangement = Arrangement.Center
         ) {
-            ScaffoldNavigation(
-                navController = navController
-            )
+            ScaffoldNavigation(navController)
         }
     }
 }
 
 @Composable
-fun BottomBarItem(selected: Boolean, clicked: () -> Unit, title: String, drawable: Int) {
+fun BottomBarItem(selected: Boolean, title: String, drawable: Int, clicked: () -> Unit) {
     Column(
         modifier = Modifier
             .wrapContentHeight()
@@ -118,26 +118,46 @@ fun BottomBarItem(selected: Boolean, clicked: () -> Unit, title: String, drawabl
                 painter = painterResource(id = drawable),
                 contentDescription = title,
                 tint = if (selected)
-                    MaterialTheme.colorScheme.surface
-                else
                     MaterialTheme.colorScheme.secondary
+                else
+                    MaterialTheme.colorScheme.surface
             )
         }
         Text(
             text = title,
             color = if (selected)
-                MaterialTheme.colorScheme.surface
-            else
                 MaterialTheme.colorScheme.secondary
+            else
+                MaterialTheme.colorScheme.surface
         )
+    }
+}
+
+@Composable
+fun ScaffoldNavigation(
+    navController: NavHostController
+) {
+    NavHost(
+        navController = navController,
+        startDestination = Screen.BottomScreen.Home.bRoute
+    ) {
+        composable(route = Screen.BottomScreen.Home.bRoute) {
+            HomeScreen()
+        }
+        composable(route = Screen.BottomScreen.Contacts.bRoute) {
+            ContactsScreen()
+        }
+        composable(route = Screen.BottomScreen.Api.bRoute) {
+            ApiScreen()
+        }
     }
 }
 
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun ScaffoldPrev(navController: NavHostController = rememberNavController()) {
+fun ScaffoldPrev() {
     AppTheme {
-        ScaffoldScreen(navController = navController)
+        ScaffoldScreen()
     }
 }
 

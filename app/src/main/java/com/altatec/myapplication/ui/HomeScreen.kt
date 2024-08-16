@@ -181,7 +181,7 @@ fun HomeScreen() {
             modifier = Modifier
                 .fillMaxWidth(),
             label = {
-                Text(text = "Hobbies")
+                Text(text = "Hobby")
             },
             trailingIcon = {
                 Icon(
