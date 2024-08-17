@@ -1,4 +1,4 @@
-package com.altatec.myapplication.viewmodel
+package com.altatec.myapplication.ui.viewmodel
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf

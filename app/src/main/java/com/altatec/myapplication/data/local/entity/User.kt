@@ -1,4 +1,4 @@
-package com.altatec.myapplication.data.room
+package com.altatec.myapplication.data.local.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -8,9 +8,9 @@ import androidx.room.PrimaryKey
 data class User(
     @PrimaryKey
     @ColumnInfo(name = "userEmail")
-    val email: String = "",
+    val email: String,
     @ColumnInfo(name = "userName")
-    val name: String = "",
+    val name: String,
     @ColumnInfo(name = "userPassword")
-    val password: String = "",
+    val password: String,
 )

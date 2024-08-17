@@ -1,4 +1,4 @@
-package com.altatec.myapplication.ui
+package com.altatec.myapplication.ui.view
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -16,6 +16,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
@@ -36,7 +37,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.altatec.myapplication.viewmodel.ScaffoldViewModel
+import com.altatec.myapplication.ui.Screen
+import com.altatec.myapplication.ui.screensInBottom
+import com.altatec.myapplication.ui.viewmodel.ScaffoldViewModel
 import com.altatec.myapplication.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -153,11 +156,28 @@ fun ScaffoldNavigation(
     }
 }
 
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
-fun ScaffoldPrev() {
+fun ScaffoldLightPrev() {
     AppTheme {
-        ScaffoldScreen()
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            ScaffoldScreen()
+        }
     }
 }
 
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun ScaffoldDarkPrev() {
+    AppTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            ScaffoldScreen()
+        }
+    }
+}

@@ -1,7 +1,8 @@
-package com.altatec.myapplication.ui
+package com.altatec.myapplication.ui.view
 
-import android.content.res.Configuration
+import android.util.Patterns
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,6 +21,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
@@ -27,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,34 +39,95 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.altatec.myapplication.R
-import com.altatec.myapplication.ui.theme.AppTheme
+import com.altatec.myapplication.data.local.entity.User
+import com.altatec.myapplication.ui.viewmodel.RegisterViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterScreen(navigateToLogin: () -> Unit) {
+fun RegisterScreen(
+    registerViewModel: RegisterViewModel,
+    navigateToLogin: () -> Unit
+) {
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+    val snackHostState = remember { SnackbarHostState() }
+    var snackMessage by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
 
     var name by remember { mutableStateOf("") }
-    var nameError by remember { mutableStateOf(false) }
-    var nameSuppText by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
-    var emailError by remember { mutableStateOf(false) }
     var emailSuppText by remember { mutableStateOf("") }
+    var emailError by remember { mutableStateOf(false) }
     var password by remember { mutableStateOf("") }
-    var passwordError by remember { mutableStateOf(false) }
     var passwordSuppText by remember { mutableStateOf("") }
+    var passwordError by remember { mutableStateOf(false) }
     var passwordVisibility by remember { mutableStateOf(false) }
     var confirmPassword by remember { mutableStateOf("") }
-    var confirmPasswordError by remember { mutableStateOf(false) }
     var confirmPasswordSuppText by remember { mutableStateOf("") }
+    var confirmPasswordError by remember { mutableStateOf(false) }
     var confirmPasswordVisibility by remember { mutableStateOf(false) }
-    var registerEnabled by remember { mutableStateOf(false) }
+
+    fun resetFields() {
+        name = ""
+        email = ""
+        emailSuppText = ""
+        emailError = false
+        password = ""
+        passwordSuppText = ""
+        passwordError = false
+        passwordVisibility = false
+        confirmPassword = ""
+        confirmPasswordSuppText = ""
+        confirmPasswordError = false
+        confirmPasswordVisibility = false
+    }
+
+    fun areAllFieldsFilled(): Boolean =
+        name.isNotBlank() && email.isNotBlank()
+                && password.isNotBlank() && confirmPassword.isNotBlank()
+
+    fun areNoError(): Boolean =
+        (!emailError && !passwordError && !confirmPasswordError)
+
+    fun isValidEmail(email: String): Boolean {
+        return if (email.isEmpty()) {
+            true
+        } else {
+            Patterns.EMAIL_ADDRESS.matcher(email).matches()
+        }
+    }
+
+    fun isValidPassword(password: String): Boolean {
+        return if (password.isEmpty()) {
+            true
+        } else {
+            password.length >= 5
+        }
+    }
+
+    fun isValidConfirmPassword(password: String, confirmPassword: String): Boolean {
+        return if (confirmPassword.isEmpty()) {
+            true
+        } else {
+            password == confirmPassword
+        }
+    }
+
+    fun showSnackbar(message: String) {
+        scope.launch {
+            snackHostState.showSnackbar(
+                message = message,
+                duration = SnackbarDuration.Short
+            )
+        }
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -85,13 +151,14 @@ fun RegisterScreen(navigateToLogin: () -> Unit) {
                     }) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "backNavigation"
+                            contentDescription = "Back Navigation"
                         )
                     }
                 },
                 scrollBehavior = scrollBehavior
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackHostState) }
     ) {
         Column(
             modifier = Modifier
@@ -116,7 +183,9 @@ fun RegisterScreen(navigateToLogin: () -> Unit) {
             OutlinedTextField(
                 value = name,
                 onValueChange = { newText ->
-                    name = newText
+                    if (newText.length <= 15) {
+                        name = newText
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -130,9 +199,11 @@ fun RegisterScreen(navigateToLogin: () -> Unit) {
                     )
                 },
                 supportingText = {
-                    Text(text = nameSuppText)
+                    Row {
+                        Spacer(Modifier.weight(1f))
+                        Text("${name.length}/15")
+                    }
                 },
-                isError = nameError,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 maxLines = 1
             )
@@ -153,16 +224,28 @@ fun RegisterScreen(navigateToLogin: () -> Unit) {
                     )
                 },
                 supportingText = {
-                    Text(text = emailSuppText)
+                    Text(
+                        text = emailSuppText
+                    )
                 },
-                isError = emailError,
+                isError = if (isValidEmail(email)) {
+                    emailSuppText = ""
+                    emailError = false
+                    false
+                } else {
+                    emailSuppText = "Please enter a valid email"
+                    emailError = true
+                    true
+                },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 maxLines = 1,
             )
             OutlinedTextField(
                 value = password,
                 onValueChange = { newText ->
-                    password = newText
+                    if (newText.length <= 10) {
+                        password = newText
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -176,7 +259,7 @@ fun RegisterScreen(navigateToLogin: () -> Unit) {
                         R.drawable.baseline_visibility_off_24
                     IconButton(
                         onClick = {
-                            passwordVisibility = passwordVisibility != true
+                            passwordVisibility = !passwordVisibility
                         }
                     ) {
                         Icon(
@@ -187,19 +270,36 @@ fun RegisterScreen(navigateToLogin: () -> Unit) {
                     }
                 },
                 supportingText = {
-                    Text(text = passwordSuppText)
+                    Row {
+                        Text(passwordSuppText)
+                        Spacer(Modifier.weight(1f))
+                        Text("${password.length}/10")
+                    }
                 },
-                isError = passwordError,
+                isError = if (isValidPassword(password)) {
+                    passwordSuppText = ""
+                    passwordError = false
+                    false
+                } else {
+                    passwordSuppText = "Please enter a valid password"
+                    passwordError = true
+                    true
+                },
+                visualTransformation = if (passwordVisibility) VisualTransformation.None
+                else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 maxLines = 1
             )
             OutlinedTextField(
                 value = confirmPassword,
                 onValueChange = { newText ->
-                    confirmPassword = newText
+                    if (newText.length <= 10) {
+                        confirmPassword = newText
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth(),
+                enabled = !passwordError && password.isNotEmpty(),
                 label = {
                     Text(text = "Confirm Password")
                 },
@@ -210,7 +310,7 @@ fun RegisterScreen(navigateToLogin: () -> Unit) {
                         R.drawable.baseline_visibility_off_24
                     IconButton(
                         onClick = {
-                            confirmPasswordVisibility = confirmPasswordVisibility != true
+                            confirmPasswordVisibility = !confirmPasswordVisibility
                         }
                     ) {
                         Icon(
@@ -221,9 +321,23 @@ fun RegisterScreen(navigateToLogin: () -> Unit) {
                     }
                 },
                 supportingText = {
-                    Text(text = confirmPasswordSuppText)
+                    Row {
+                        Text(confirmPasswordSuppText)
+                        Spacer(Modifier.weight(1f))
+                        Text("${confirmPassword.length}/10")
+                    }
                 },
-                isError = confirmPasswordError,
+                isError = if (isValidConfirmPassword(password, confirmPassword)) {
+                    confirmPasswordSuppText = ""
+                    confirmPasswordError = false
+                    false
+                } else {
+                    confirmPasswordSuppText = "Confirm password is not equal to password"
+                    confirmPasswordError = true
+                    true
+                },
+                visualTransformation = if (confirmPasswordVisibility) VisualTransformation.None
+                else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 maxLines = 1,
             )
@@ -233,22 +347,23 @@ fun RegisterScreen(navigateToLogin: () -> Unit) {
             )
             Button(
                 onClick = {
-                    /*TODO register*/
+                    try {
+                        val user =
+                            User(name, email, password)
+                        registerViewModel.insertUser(user)
+                        snackMessage = "User Added Successfully"
+                        resetFields()
+                    } catch (e: Exception) {
+                        snackMessage = "Something went wrong"
+                    }
+                    showSnackbar(snackMessage)
                 },
                 modifier = Modifier
                     .fillMaxWidth(),
-                enabled = registerEnabled
+                enabled = areAllFieldsFilled() && areNoError()
             ) {
                 Text(text = "REGISTER")
             }
         }
-    }
-}
-
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-fun RegisterPrev() {
-    AppTheme {
-        RegisterScreen {}
     }
 }

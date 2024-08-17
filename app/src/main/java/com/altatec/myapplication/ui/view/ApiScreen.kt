@@ -1,4 +1,4 @@
-package com.altatec.myapplication.ui
+package com.altatec.myapplication.ui.view
 
 import android.content.res.Configuration
 import android.text.TextUtils
@@ -43,11 +43,11 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.altatec.myapplication.R
-import com.altatec.myapplication.data.api.DummyCharacter
-import com.altatec.myapplication.data.api.DummyCharacterList
+import com.altatec.myapplication.data.remote.DummyCharacter
+import com.altatec.myapplication.data.remote.DummyCharacterList
 import com.altatec.myapplication.ui.theme.AppTheme
-import com.altatec.myapplication.viewmodel.ApiViewModel
-import com.altatec.myapplication.data.api.Result
+import com.altatec.myapplication.ui.viewmodel.ApiViewModel
+import com.altatec.myapplication.data.remote.Result
 
 @Composable
 fun ApiScreen() {

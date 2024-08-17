@@ -1,4 +1,4 @@
-package com.altatec.myapplication.data.api
+package com.altatec.myapplication.data.remote
 
 import com.google.gson.annotations.SerializedName
 

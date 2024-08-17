@@ -1,12 +1,12 @@
-package com.altatec.myapplication.viewmodel
+package com.altatec.myapplication.ui.viewmodel
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.altatec.myapplication.data.api.Info
-import com.altatec.myapplication.data.api.Result
-import com.altatec.myapplication.data.api.characterService
+import com.altatec.myapplication.data.remote.Info
+import com.altatec.myapplication.data.remote.Result
+import com.altatec.myapplication.data.remote.characterService
 import kotlinx.coroutines.launch
 
 class ApiViewModel : ViewModel() {
@@ -17,6 +17,7 @@ class ApiViewModel : ViewModel() {
     init {
         fetchCharacters()
     }
+
     private fun fetchCharacters(){
         viewModelScope.launch {
             try {

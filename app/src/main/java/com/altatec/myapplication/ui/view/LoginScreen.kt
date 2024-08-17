@@ -1,10 +1,10 @@
-package com.altatec.myapplication.ui
+package com.altatec.myapplication.ui.view
 
-import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,32 +23,57 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.altatec.myapplication.R
-import com.altatec.myapplication.ui.theme.AppTheme
+import com.altatec.myapplication.ui.viewmodel.LoginViewModel
 
 @Composable
-fun LoginScreen(navigateToRegister: () -> Unit, navigateToScaffold: () -> Unit) {
+fun LoginScreen(
+    loginViewModel: LoginViewModel,
+    navigateToRegister: () -> Unit,
+    navigateToScaffold: () -> Unit
+) {
+
+    val context = LocalContext.current
+    val versionName = if (LocalInspectionMode.current) {
+        "Demo"
+    } else {
+        remember {
+            context.packageManager
+                .getPackageInfo(context.packageName, 0).versionName
+        }
+    }
 
     var email by remember { mutableStateOf("") }
-    var emailSuppText by remember { mutableStateOf("") }
-    var emailError by remember { mutableStateOf(false) }
     var password by remember { mutableStateOf("") }
-    var passwordSuppText by remember { mutableStateOf("") }
-    var passwordError by remember { mutableStateOf(false) }
     var passwordVisibility by remember { mutableStateOf(false) }
+
+    val emailSuppText by loginViewModel::emailSuppText
+    val emailError by loginViewModel::emailError
+    val passwordSuppText by loginViewModel::passwordSuppText
+    val passwordError by loginViewModel::passwordError
+    val goToScaffold by loginViewModel::goToScaffold
+
+    LaunchedEffect(goToScaffold) {
+        if (goToScaffold) {
+            navigateToScaffold()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -59,7 +84,7 @@ fun LoginScreen(navigateToRegister: () -> Unit, navigateToScaffold: () -> Unit) 
     ) {
         Image(
             painter = painterResource(id = R.drawable.android_logo),
-            contentDescription = "Android Logo"
+            contentDescription = "Android_Logo"
         )
         Card(
             elevation = CardDefaults.cardElevation(24.dp),
@@ -87,30 +112,33 @@ fun LoginScreen(navigateToRegister: () -> Unit, navigateToScaffold: () -> Unit) 
                     },
                     modifier = Modifier
                         .fillMaxWidth(),
-                    maxLines = 1,
                     label = {
                         Text(text = "Email")
                     },
                     trailingIcon = {
                         Icon(
                             imageVector = Icons.Filled.Email,
-                            contentDescription = "Password"
+                            contentDescription = "Email"
                         )
                     },
                     supportingText = {
-                        Text(text = emailSuppText)
+                        Text(
+                            text = emailSuppText
+                        )
                     },
                     isError = emailError,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    maxLines = 1
                 )
                 OutlinedTextField(
                     value = password,
                     onValueChange = { newText ->
-                        password = newText
+                        if (newText.length <= 10) {
+                            password = newText
+                        }
                     },
                     modifier = Modifier
                         .fillMaxWidth(),
-                    maxLines = 1,
                     label = {
                         Text(text = "Password")
                     },
@@ -121,7 +149,7 @@ fun LoginScreen(navigateToRegister: () -> Unit, navigateToScaffold: () -> Unit) 
                             R.drawable.baseline_visibility_off_24
                         IconButton(
                             onClick = {
-                                passwordVisibility = passwordVisibility != true
+                                passwordVisibility = !passwordVisibility
                             }
                         ) {
                             Icon(
@@ -132,20 +160,26 @@ fun LoginScreen(navigateToRegister: () -> Unit, navigateToScaffold: () -> Unit) 
                         }
                     },
                     supportingText = {
-                        Text(text = passwordSuppText)
+                        Row {
+                            Text(passwordSuppText)
+                            Spacer(Modifier.weight(1f))
+                            Text("${password.length}/10")
+                        }
                     },
                     isError = passwordError,
-                    visualTransformation = PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                    visualTransformation = if (passwordVisibility) VisualTransformation.None
+                    else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    maxLines = 1,
                 )
                 Button(
                     onClick = {
-                        /*TODO Check credentials*/
-                        navigateToScaffold()
+                        loginViewModel.onLoginClick(email, password)
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 16.dp)
+                        .padding(vertical = 16.dp),
+                    enabled = areAllFieldsFilled(email, password)
                 ) {
                     Text(text = "LOGIN")
                 }
@@ -164,14 +198,13 @@ fun LoginScreen(navigateToRegister: () -> Unit, navigateToScaffold: () -> Unit) 
         ) {
             Text(text = "REGISTER")
         }
-        Text(text = "v.2.0")
+        Text(text = "v.$versionName")
     }
 }
 
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-fun LoginPrev() {
-    AppTheme {
-        LoginScreen({},{})
-    }
+fun areAllFieldsFilled(
+    email: String,
+    password: String
+): Boolean {
+    return email.isNotBlank() && password.isNotBlank()
 }

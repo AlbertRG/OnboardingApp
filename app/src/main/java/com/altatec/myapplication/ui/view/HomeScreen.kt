@@ -1,4 +1,4 @@
-package com.altatec.myapplication.ui
+package com.altatec.myapplication.ui.view
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
