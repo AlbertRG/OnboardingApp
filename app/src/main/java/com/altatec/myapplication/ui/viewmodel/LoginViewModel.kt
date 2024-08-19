@@ -27,6 +27,7 @@ open class LoginViewModel @Inject constructor(
     var goToScaffold by mutableStateOf(false)
 
     fun onLoginClick(email: String, password: String) {
+        resetSuppTextAndErrors()
         viewModelScope.launch {
             if (isEmailRegister(email)) {
                 emailError = false
@@ -57,6 +58,13 @@ open class LoginViewModel @Inject constructor(
 
     private fun isPasswordCorrect(password: String): Boolean {
         return _user?.password == password
+    }
+
+    private fun resetSuppTextAndErrors(){
+        emailSuppText = ""
+        emailError = false
+        passwordSuppText = ""
+        passwordError = false
     }
 
 }

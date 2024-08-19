@@ -349,7 +349,7 @@ fun RegisterScreen(
                 onClick = {
                     try {
                         val user =
-                            User(name, email, password)
+                            User(email = email, name = name, password = password)
                         registerViewModel.insertUser(user)
                         snackMessage = "User Added Successfully"
                         resetFields()

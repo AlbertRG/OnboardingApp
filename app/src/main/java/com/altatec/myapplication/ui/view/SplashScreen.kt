@@ -24,7 +24,7 @@ fun SplashScreen(navigateToLogin:() -> Unit) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.android_splash))
 
     LaunchedEffect(key1 = true){
-        delay(8000)
+        delay(7000)
         navigateToLogin()
     }
 
