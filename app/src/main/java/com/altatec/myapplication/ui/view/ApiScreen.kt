@@ -65,11 +65,11 @@ fun ApiScreen() {
         } else {
             when {
                 viewState.loading -> {
-                    LoadingView()
+                    LoadingApiView()
                 }
 
                 viewState.error != null -> {
-                    ErrorView(viewState.error.toString())
+                    ErrorApiView(viewState.error.toString())
                 }
 
                 else -> {
@@ -80,7 +80,6 @@ fun ApiScreen() {
         }
     }
 }
-
 
 @Composable
 fun CharacterListView(responseCharacters: List<Result>) {
@@ -176,7 +175,7 @@ fun ApiItem(character: Result) {
 }
 
 @Composable
-fun LoadingView() {
+fun LoadingApiView() {
 
     val composition by rememberLottieComposition(
         LottieCompositionSpec.RawRes(R.raw.loading)
@@ -194,7 +193,7 @@ fun LoadingView() {
 }
 
 @Composable
-fun ErrorView(error: String) {
+fun ErrorApiView(error: String) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -242,7 +241,7 @@ fun ApiItemPrev() {
 @Composable
 fun LoadingPrev() {
     AppTheme {
-        LoadingView()
+        LoadingApiView()
     }
 }
 
@@ -250,6 +249,6 @@ fun LoadingPrev() {
 @Composable
 fun ErrorPrev() {
     AppTheme {
-        ErrorView("Error fetching CharactersResponse")
+        ErrorApiView("Error fetching CharactersResponse")
     }
 }

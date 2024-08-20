@@ -28,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -41,6 +42,8 @@ import com.altatec.myapplication.ui.Screen
 import com.altatec.myapplication.ui.screensInBottom
 import com.altatec.myapplication.ui.viewmodel.ScaffoldViewModel
 import com.altatec.myapplication.ui.theme.AppTheme
+import com.altatec.myapplication.utils.CameraUtils
+import com.altatec.myapplication.utils.LocationUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -145,7 +148,10 @@ fun ScaffoldNavigation(
         startDestination = Screen.BottomScreen.Home.bRoute
     ) {
         composable(route = Screen.BottomScreen.Home.bRoute) {
-            HomeScreen()
+            val context = LocalContext.current
+            val cameraUtils = CameraUtils(context)
+            val locationUtils = LocationUtils(context)
+            HomeScreen(cameraUtils, locationUtils, context)
         }
         composable(route = Screen.BottomScreen.Contacts.bRoute) {
             ContactsScreen()

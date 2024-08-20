@@ -96,29 +96,14 @@ fun RegisterScreen(
     fun areNoError(): Boolean =
         (!emailError && !passwordError && !confirmPasswordError)
 
-    fun isValidEmail(email: String): Boolean {
-        return if (email.isEmpty()) {
-            true
-        } else {
-            Patterns.EMAIL_ADDRESS.matcher(email).matches()
-        }
-    }
+    fun isValidEmail(email: String): Boolean =
+        email.isEmpty() || Patterns.EMAIL_ADDRESS.matcher(email).matches()
 
-    fun isValidPassword(password: String): Boolean {
-        return if (password.isEmpty()) {
-            true
-        } else {
-            password.length >= 5
-        }
-    }
+    fun isValidPassword(password: String): Boolean =
+        password.isEmpty() || password.length >= 5
 
-    fun isValidConfirmPassword(password: String, confirmPassword: String): Boolean {
-        return if (confirmPassword.isEmpty()) {
-            true
-        } else {
-            password == confirmPassword
-        }
-    }
+    fun isValidConfirmPassword(password: String, confirmPassword: String): Boolean =
+        confirmPassword.isEmpty() || password == confirmPassword
 
     fun showSnackbar(message: String) {
         scope.launch {
