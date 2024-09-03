@@ -41,6 +41,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.altatec.myapplication.R
 import com.altatec.myapplication.data.remote.DummyCharacter
@@ -188,7 +189,10 @@ fun LoadingApiView() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        LottieAnimation(composition = composition)
+        LottieAnimation(
+            composition = composition,
+            iterations = LottieConstants.IterateForever
+        )
     }
 }
 

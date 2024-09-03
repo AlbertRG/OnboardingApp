@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -37,6 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,8 +60,10 @@ import com.altatec.myapplication.ui.theme.AppTheme
 import com.altatec.myapplication.ui.viewmodel.HomeViewModel
 import com.altatec.myapplication.utils.CameraUtils
 import com.altatec.myapplication.utils.LocationUtils
+import java.time.Instant
 import java.time.LocalDate
 import java.time.Period
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
@@ -73,7 +77,7 @@ fun HomeScreen(
     val homeViewModel: HomeViewModel = viewModel()
 
     var name by remember { mutableStateOf("") }
-    var birthday by remember { mutableStateOf("") }
+    var birthday by remember { mutableStateOf("Select Date") }
     var address by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
     var phoneError by remember { mutableStateOf(false) }
@@ -81,6 +85,8 @@ fun HomeScreen(
     var hobby by remember { mutableStateOf("") }
     val hobbySuppText by remember { mutableStateOf("Optional") }
     val nameFocusRequester = remember { FocusRequester() }
+
+    var showDatePicker by remember { mutableStateOf(false) }
 
     val location = homeViewModel.location.value
 
@@ -117,6 +123,10 @@ fun HomeScreen(
         //TODO Take photo
     }
 
+    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) {
+
+    }
+
     var toastMessage by remember { mutableStateOf("") }
 
     fun showLongToast(message: String) {
@@ -128,7 +138,7 @@ fun HomeScreen(
         onResult = { permission ->
             if (permission[Manifest.permission.CAMERA] == true) {
                 takePhoto()
-                toastMessage = "Camera permission is already acquire"
+                //toastMessage = "Camera permission is already acquire"
             } else {
                 val rationaleRequired =
                     ActivityCompat.shouldShowRequestPermissionRationale(
@@ -145,15 +155,29 @@ fun HomeScreen(
         }
     )
 
-    fun getAddress(){
+    fun formatDate(milliseconds: Long?): String {
+        return milliseconds?.let {
+            val instant = Instant.ofEpochMilli(it)
+            val zoneId = ZoneId.systemDefault()
+            val localDate = instant.atZone(zoneId).toLocalDate()
+            val formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy")
+            localDate.format(formatter)
+        } ?: "No date selected"
+    }
+
+    fun getLocation() {
         locationUtils.requestLocationUpdates(homeViewModel)
-        if (location != null){
-            address = location.let{
-                locationUtils.reverseGeocodeLocation(location)
-            }
-        } else {
-            address = "Address not found"
-        }
+    }
+
+    fun getAddress() {
+        locationUtils.requestLocationUpdates(homeViewModel)
+        address = location?.let {
+            locationUtils.reverseGeocodeLocation(location)
+        } ?: "Address not found"
+    }
+
+    LaunchedEffect(Unit) {
+        getLocation()
     }
 
     val requestLocationPermissionLauncher = rememberLauncherForActivityResult(
@@ -281,7 +305,7 @@ fun HomeScreen(
             trailingIcon = {
                 IconButton(
                     onClick = {
-                        birthday = "click" //TODO
+                        showDatePicker = true
                     }
                 ) {
                     Icon(
@@ -413,6 +437,17 @@ fun HomeScreen(
         ) {
             Text(text = "Add Contact")
         }
+    }
+    if (showDatePicker) {
+        DatePickerModal(
+            onDateSelected = { date ->
+                birthday = formatDate(date)
+                showDatePicker = false
+            },
+            onDismiss = {
+                showDatePicker = false
+            }
+        )
     }
 }
 

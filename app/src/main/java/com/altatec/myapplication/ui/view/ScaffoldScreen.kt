@@ -50,11 +50,10 @@ import com.altatec.myapplication.utils.LocationUtils
 fun ScaffoldScreen() {
 
     val scaffoldViewModel: ScaffoldViewModel = viewModel()
-    val currentScreen by remember { scaffoldViewModel.currentScreen }
 
     val navController: NavHostController = rememberNavController()
     var currentRoute by remember { mutableStateOf("home_screen") }
-    var title by remember { mutableStateOf(currentScreen.bTitle) }
+    var title by remember { mutableStateOf("Home") }
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
@@ -104,7 +103,8 @@ fun ScaffoldScreen() {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it),
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             ScaffoldNavigation(navController)
         }

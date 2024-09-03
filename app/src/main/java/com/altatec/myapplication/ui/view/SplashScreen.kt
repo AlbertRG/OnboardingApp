@@ -19,11 +19,11 @@ import com.altatec.myapplication.ui.theme.AppTheme
 import kotlinx.coroutines.delay
 
 @Composable
-fun SplashScreen(navigateToLogin:() -> Unit) {
+fun SplashScreen(navigateToLogin: () -> Unit) {
 
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.android_splash))
 
-    LaunchedEffect(key1 = true){
+    LaunchedEffect(key1 = true) {
         delay(7000)
         navigateToLogin()
     }
@@ -39,7 +39,10 @@ fun SplashScreen(navigateToLogin:() -> Unit) {
     }
 }
 
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
 @Composable
 fun SplashPrev() {
     AppTheme {

@@ -63,14 +63,14 @@ class LocationUtils(private var context: Context) {
 
     }
 
-    fun reverseGeocodeLocation(location: LocationData) : String{
+    fun reverseGeocodeLocation(location: LocationData): String {
         val geocoder = Geocoder(context, Locale.getDefault())
         val coordinate = LatLng(location.latitude, location.longitude)
-        val addresses:MutableList<Address>? =
+        val addresses: MutableList<Address>? =
             geocoder.getFromLocation(coordinate.latitude, coordinate.longitude, 1)
-        return if(addresses?.isNotEmpty() == true){
+        return if (addresses?.isNotEmpty() == true) {
             addresses[0].getAddressLine(0)
-        }else{
+        } else {
             "Address not found"
         }
     }

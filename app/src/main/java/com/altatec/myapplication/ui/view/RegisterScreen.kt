@@ -336,7 +336,7 @@ fun RegisterScreen(
                         val user =
                             User(email = email, name = name, password = password)
                         registerViewModel.insertUser(user)
-                        snackMessage = "User Added Successfully"
+                        snackMessage = "User added successfully"
                         resetFields()
                     } catch (e: Exception) {
                         snackMessage = "Something went wrong"
