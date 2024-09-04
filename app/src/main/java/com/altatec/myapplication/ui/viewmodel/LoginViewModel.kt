@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-open class LoginViewModel @Inject constructor(
+class LoginViewModel @Inject constructor(
     private val getUserByEmailUseCase: GetUserByEmailUseCase
 ) : ViewModel() {
 

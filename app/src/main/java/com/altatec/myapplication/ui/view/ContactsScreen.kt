@@ -123,7 +123,7 @@ fun ContactItem(contact: Contact, onClickContact:() -> Unit) {
     ) {
         Image(
             painter = if (LocalInspectionMode.current) {
-                painterResource(id = R.drawable.baseline_add_a_photo_48)
+                painterResource(id = R.drawable.baseline_add_a_photo_24)
             } else {
                 rememberAsyncImagePainter(contact.photo)
             },

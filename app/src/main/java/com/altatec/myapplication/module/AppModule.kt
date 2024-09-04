@@ -5,7 +5,9 @@ import androidx.room.Room
 import com.altatec.myapplication.data.OnboardingLocalRepository
 import com.altatec.myapplication.data.local.OnboardingDao
 import com.altatec.myapplication.data.local.OnboardingDatabase
+import com.altatec.myapplication.domain.GetContactsUseCase
 import com.altatec.myapplication.domain.GetUserByEmailUseCase
+import com.altatec.myapplication.domain.InsertContactUseCase
 import com.altatec.myapplication.domain.InsertUserUseCase
 import dagger.Module
 import dagger.Provides
@@ -44,6 +46,18 @@ object AppModule {
     @Singleton
     fun provideGetUserByEmail(repository: OnboardingLocalRepository): GetUserByEmailUseCase {
         return GetUserByEmailUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideInsertContact(repository: OnboardingLocalRepository): InsertContactUseCase {
+        return InsertContactUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGetContactS(repository: OnboardingLocalRepository): GetContactsUseCase {
+        return GetContactsUseCase(repository)
     }
 
 }

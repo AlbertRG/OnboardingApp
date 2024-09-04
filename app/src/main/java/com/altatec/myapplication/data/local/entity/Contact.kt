@@ -14,7 +14,7 @@ data class Contact(
     @ColumnInfo(name = "contactId")
     val id: Long,
     @ColumnInfo(name = "contactPhoto")
-    val photo: Bitmap,
+    val photo: Bitmap?,
     @ColumnInfo(name = "contactName")
     val name: String,
     @ColumnInfo(name = "contactBirthday")

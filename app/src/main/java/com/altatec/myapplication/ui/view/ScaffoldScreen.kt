@@ -33,6 +33,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -42,6 +43,8 @@ import com.altatec.myapplication.ui.Screen
 import com.altatec.myapplication.ui.screensInBottom
 import com.altatec.myapplication.ui.viewmodel.ScaffoldViewModel
 import com.altatec.myapplication.ui.theme.AppTheme
+import com.altatec.myapplication.ui.viewmodel.HomeViewModel
+import com.altatec.myapplication.ui.viewmodel.LoginViewModel
 import com.altatec.myapplication.utils.CameraUtils
 import com.altatec.myapplication.utils.LocationUtils
 
@@ -151,7 +154,8 @@ fun ScaffoldNavigation(
             val context = LocalContext.current
             val cameraUtils = CameraUtils(context)
             val locationUtils = LocationUtils(context)
-            HomeScreen(cameraUtils, locationUtils, context)
+            val homeViewModel = hiltViewModel<HomeViewModel>()
+            HomeScreen(homeViewModel, cameraUtils, locationUtils, context)
         }
         composable(route = Screen.BottomScreen.Contacts.bRoute) {
             ContactsScreen()
