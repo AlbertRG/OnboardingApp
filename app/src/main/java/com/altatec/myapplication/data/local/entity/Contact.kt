@@ -4,9 +4,6 @@ import android.graphics.Bitmap
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.altatec.myapplication.data.remote.Location
-import com.altatec.myapplication.data.remote.Origin
-import com.altatec.myapplication.data.remote.Result
 
 @Entity(tableName = "contactTable")
 data class Contact(
@@ -14,7 +11,7 @@ data class Contact(
     @ColumnInfo(name = "contactId")
     val id: Long,
     @ColumnInfo(name = "contactPhoto")
-    val photo: Bitmap?,
+    val photo: Bitmap,
     @ColumnInfo(name = "contactName")
     val name: String,
     @ColumnInfo(name = "contactBirthday")
@@ -32,8 +29,8 @@ object DummyContact {
         id = 2,
         photo = Bitmap.createBitmap(100,100,Bitmap.Config.ARGB_8888),
         name = "Alberto",
-        birthday = "05/11/94",
-        address = "Male",
+        birthday = "05-11-1994",
+        address = "Angel #123",
         phone = "1234567890",
         hobby = "None"
     )

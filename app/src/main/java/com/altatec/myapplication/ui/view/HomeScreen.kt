@@ -38,18 +38,14 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
@@ -61,11 +57,8 @@ import com.altatec.myapplication.ui.viewmodel.HomeViewModel
 import com.altatec.myapplication.utils.CameraUtils
 import com.altatec.myapplication.utils.LocationUtils
 import java.time.Instant
-import java.time.LocalDate
-import java.time.Period
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeParseException
 
 @Composable
 fun HomeScreen(
@@ -87,10 +80,6 @@ fun HomeScreen(
     var phoneSuppText by remember { mutableStateOf("") }
     var hobby by remember { mutableStateOf("") }
     val hobbySuppText by remember { mutableStateOf("Optional") }
-    val nameFocusRequester = remember { FocusRequester() }
-
-    var photoPreview by remember { mutableStateOf<ImageBitmap?>(null) }
-    var photoBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     var showDatePicker by remember { mutableStateOf(false) }
 
@@ -113,6 +102,9 @@ fun HomeScreen(
     fun areAllFieldsFilled(): Boolean =
         name.isNotBlank() && birthday.isNotBlank()
                 && address.isNotBlank() && phone.isNotBlank()
+
+    fun areNoErrors(): Boolean =
+        !birthdayError && !addressError && !phoneError
 
     fun isValidPhone(phone: String): Boolean =
         phone.isEmpty() || phone.length == 10
@@ -152,22 +144,22 @@ fun HomeScreen(
         return bitmap
     }
 
-    val drawable =
-        ContextCompat.getDrawable(LocalContext.current, R.drawable.baseline_add_a_photo_24)
-
-    val imageBitmap by remember(drawable) {
-        derivedStateOf {
-            photoPreview ?: drawable?.let {
-                drawableToBitmap(it).asImageBitmap()
-            }
-        }
-    }
+    val defaultDrawable = ContextCompat.getDrawable(context, R.drawable.baseline_person_24)
+    val defaultBitmap = defaultDrawable?.let { drawableToBitmap(it) } ?: Bitmap.createBitmap(
+        1,
+        1,
+        Bitmap.Config.ARGB_8888
+    )
+    var photoBitmap by remember { mutableStateOf(defaultBitmap) }
+    var photoPreview by remember { mutableStateOf(defaultBitmap.asImageBitmap()) }
+    var wasPhotoTaken by remember { mutableStateOf(false) }
 
     val cameraLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) {
-            if (it != null) {
-                photoPreview = it.asImageBitmap()
-                photoBitmap = it
+            it?.let { photo ->
+                photoPreview = photo.asImageBitmap()
+                photoBitmap = photo
+                wasPhotoTaken = true
             }
         }
 
@@ -267,12 +259,22 @@ fun HomeScreen(
                 .size(160.dp)
                 .padding(8.dp)
         ) {
-            Image(
-                bitmap = imageBitmap ?: ImageBitmap(1, 1),
-                contentDescription = "Photo",
-                modifier = Modifier
-                    .size(150.dp)
-            )
+            if (wasPhotoTaken) {
+                Image(
+                    bitmap = photoPreview,
+                    contentDescription = "Photo",
+                    modifier = Modifier
+                        .size(150.dp)
+                )
+            } else {
+                Image(
+                    painter = painterResource(id = R.drawable.baseline_add_a_photo_24),
+                    contentDescription = "Photo",
+                    modifier = Modifier
+                        .size(150.dp)
+                        .padding(16.dp)
+                )
+            }
         }
         Spacer(
             modifier = Modifier
@@ -286,8 +288,7 @@ fun HomeScreen(
                 }
             },
             modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(nameFocusRequester),
+                .fillMaxWidth(),
             label = {
                 Text(text = "Name")
             },
@@ -334,6 +335,7 @@ fun HomeScreen(
                     text = when {
                         birthday.isEmpty() || birthday == "No date selected" ->
                             "Please click on the icon to select a birthday"
+
                         else ->
                             ""
                     }
@@ -381,11 +383,12 @@ fun HomeScreen(
                 }
             },
             supportingText = {
-                Text(text = if (address != ""){
-                    ""
-                } else {
-                    "Please click on the icon to select a address"
-                }
+                Text(
+                    text = if (address != "") {
+                        ""
+                    } else {
+                        "Please click on the icon to select a address"
+                    }
                 )
             },
             isError = if (isValidAddress(address)) {
@@ -467,7 +470,9 @@ fun HomeScreen(
                     homeViewModel.insertContact(contact)
                     toastMessage = "Contact added successfully"
                     resetFields()
-                    nameFocusRequester.requestFocus()
+                    wasPhotoTaken = false
+                    photoBitmap = defaultBitmap
+                    photoPreview = defaultBitmap.asImageBitmap()
                 } catch (e: Exception) {
                     toastMessage = "Something went wrong"
                 }
@@ -476,7 +481,7 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 24.dp),
-            enabled = areAllFieldsFilled()
+            enabled = areAllFieldsFilled() && areNoErrors()
         ) {
             Text(text = "Add Contact")
         }
@@ -519,17 +524,5 @@ fun DatePickerModal(
         }
     ) {
         DatePicker(state = datePickerState)
-    }
-}
-
-fun calculateAge(birthday: String, pattern: String = "yyyy-MM-dd"): String {
-    return try {
-        val formatter = DateTimeFormatter.ofPattern(pattern)
-        val birthDate = LocalDate.parse(birthday, formatter)
-        val currentDate = LocalDate.now()
-        val age = Period.between(birthDate, currentDate).years
-        age.toString()
-    } catch (e: DateTimeParseException) {
-        "Error"
     }
 }

@@ -34,25 +34,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.altatec.myapplication.ui.Screen
 import com.altatec.myapplication.ui.screensInBottom
-import com.altatec.myapplication.ui.viewmodel.ScaffoldViewModel
 import com.altatec.myapplication.ui.theme.AppTheme
+import com.altatec.myapplication.ui.viewmodel.ContactsViewModel
 import com.altatec.myapplication.ui.viewmodel.HomeViewModel
-import com.altatec.myapplication.ui.viewmodel.LoginViewModel
 import com.altatec.myapplication.utils.CameraUtils
 import com.altatec.myapplication.utils.LocationUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScaffoldScreen() {
-
-    val scaffoldViewModel: ScaffoldViewModel = viewModel()
 
     val navController: NavHostController = rememberNavController()
     var currentRoute by remember { mutableStateOf("home_screen") }
@@ -158,7 +154,8 @@ fun ScaffoldNavigation(
             HomeScreen(homeViewModel, cameraUtils, locationUtils, context)
         }
         composable(route = Screen.BottomScreen.Contacts.bRoute) {
-            ContactsScreen()
+            val contactsViewModel = hiltViewModel<ContactsViewModel>()
+            ContactsScreen(contactsViewModel)
         }
         composable(route = Screen.BottomScreen.Api.bRoute) {
             ApiScreen()
