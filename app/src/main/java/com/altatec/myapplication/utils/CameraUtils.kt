@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 
-class CameraUtils(val context: Context) {
+class CameraUtils {
 
     fun hasCameraPermission(context: Context): Boolean {
 

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -112,7 +111,7 @@ fun ContactListView(responseContact: List<Contact>) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight()
+                .weight(1f)
         ) {
             items(responseContact) { contact ->
                 ContactItem(contact = contact) {
@@ -161,7 +160,7 @@ fun ContactItem(contact: Contact, onClickContact: () -> Unit) {
         ) {
             if (LocalInspectionMode.current) {
                 Image(
-                    painter = painterResource(id = R.drawable.baseline_person_24),
+                    painter = painterResource(id = R.drawable.baseline_person_72),
                     contentDescription = contact.name,
                     modifier = Modifier
                         .size(80.dp)
@@ -248,6 +247,23 @@ fun ErrorContactView(error: String) {
 @Composable
 fun ContactInfoDialog(contact: Contact?, onDismiss: () -> Unit) {
     if (contact == null) return
+
+    fun formatDateToText(dateStr: String): String {
+        val monthNames = listOf(
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        )
+
+        return try {
+            val formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy")
+            val date = LocalDate.parse(dateStr, formatter)
+            val monthName = monthNames[date.monthValue - 1]
+            "$monthName ${date.dayOfMonth}, ${date.year}"
+        } catch (e: DateTimeParseException) {
+            "Invalid date"
+        }
+    }
+
     Dialog(onDismissRequest = onDismiss) {
         Card(
             modifier = Modifier
@@ -265,8 +281,9 @@ fun ContactInfoDialog(contact: Contact?, onDismiss: () -> Unit) {
                 Text(
                     text = "Contact Info",
                     modifier = Modifier
-                        .padding(end = 65.dp),
+                        .padding(end = 55.dp),
                     color = Color.Black,
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
                 )
                 IconButton(
@@ -282,13 +299,13 @@ fun ContactInfoDialog(contact: Contact?, onDismiss: () -> Unit) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp),
+                    .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (LocalInspectionMode.current) {
                     Image(
-                        painter = painterResource(id = R.drawable.baseline_person_24),
+                        painter = painterResource(id = R.drawable.baseline_person_72),
                         contentDescription = contact.name,
                         modifier = Modifier
                             .size(160.dp)
@@ -310,20 +327,16 @@ fun ContactInfoDialog(contact: Contact?, onDismiss: () -> Unit) {
                     fontSize = 24.sp
                 )
                 Text(
-                    text = contact.birthday,
+                    text = "Birthday: ${formatDateToText(contact.birthday)}",
                     fontSize = 18.sp
                 )
                 Text(
-                    text = contact.address,
+                    text = "Phone: ${contact.phone}",
                     fontSize = 18.sp
                 )
-                Text(
-                    text = contact.phone,
-                    fontSize = 18.sp
-                )
-                if (contact.hobby != ""){
+                if (contact.hobby != "") {
                     Text(
-                        text = contact.hobby,
+                        text = "Hobby: ${contact.hobby}",
                         fontSize = 18.sp
                     )
                 }

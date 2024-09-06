@@ -66,6 +66,10 @@ dependencies {
     //Location
     implementation("com.google.android.gms:play-services-location:21.3.0")
 
+    //Maps
+    implementation("com.google.maps.android:maps-compose:6.1.2")
+    implementation("com.google.android.gms:play-services-maps:19.0.0")
+
     //Navigation
     implementation("androidx.navigation:navigation-compose:2.7.7")
 

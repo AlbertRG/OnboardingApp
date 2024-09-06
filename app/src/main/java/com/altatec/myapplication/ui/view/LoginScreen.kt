@@ -1,6 +1,5 @@
 package com.altatec.myapplication.ui.view
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,7 +18,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -87,8 +85,7 @@ fun LoginScreen(
             contentDescription = "Android_Logo"
         )
         Card(
-            elevation = CardDefaults.cardElevation(24.dp),
-            border = BorderStroke(2.dp, color = MaterialTheme.colorScheme.primary)
+            elevation = CardDefaults.cardElevation(8.dp),
         ) {
             Column(
                 modifier = Modifier

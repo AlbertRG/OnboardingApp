@@ -41,6 +41,7 @@ import androidx.navigation.compose.rememberNavController
 import com.altatec.myapplication.ui.Screen
 import com.altatec.myapplication.ui.screensInBottom
 import com.altatec.myapplication.ui.theme.AppTheme
+import com.altatec.myapplication.ui.viewmodel.ApiViewModel
 import com.altatec.myapplication.ui.viewmodel.ContactsViewModel
 import com.altatec.myapplication.ui.viewmodel.HomeViewModel
 import com.altatec.myapplication.utils.CameraUtils
@@ -148,7 +149,7 @@ fun ScaffoldNavigation(
     ) {
         composable(route = Screen.BottomScreen.Home.bRoute) {
             val context = LocalContext.current
-            val cameraUtils = CameraUtils(context)
+            val cameraUtils = CameraUtils()
             val locationUtils = LocationUtils(context)
             val homeViewModel = hiltViewModel<HomeViewModel>()
             HomeScreen(homeViewModel, cameraUtils, locationUtils, context)
@@ -158,6 +159,7 @@ fun ScaffoldNavigation(
             ContactsScreen(contactsViewModel)
         }
         composable(route = Screen.BottomScreen.Api.bRoute) {
+            val apiViewModel = hiltViewModel<ApiViewModel>()
             ApiScreen()
         }
     }

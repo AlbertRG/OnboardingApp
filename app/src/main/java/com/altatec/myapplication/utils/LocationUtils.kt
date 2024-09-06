@@ -63,6 +63,7 @@ class LocationUtils(private var context: Context) {
 
     }
 
+    @Suppress("DEPRECATION")
     fun reverseGeocodeLocation(location: LocationData): String {
         val geocoder = Geocoder(context, Locale.getDefault())
         val coordinate = LatLng(location.latitude, location.longitude)

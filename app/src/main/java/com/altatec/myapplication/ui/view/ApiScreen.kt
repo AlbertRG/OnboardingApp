@@ -144,6 +144,15 @@ fun CharacterListView(
             modifier = Modifier
                 .padding(8.dp)
         )
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ) {
+            items(filterCharacterList) { character ->
+                ApiItem(character = character)
+            }
+        }
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -172,15 +181,6 @@ fun CharacterListView(
                     modifier = Modifier
                         .size(32.dp)
                 )
-            }
-        }
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-        ) {
-            items(filterCharacterList) { character ->
-                ApiItem(character = character)
             }
         }
     }

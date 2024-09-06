@@ -2,6 +2,7 @@ package com.altatec.myapplication.ui.view
 
 import android.Manifest
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
@@ -11,27 +12,35 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -44,18 +53,33 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.altatec.myapplication.MainActivity
 import com.altatec.myapplication.R
 import com.altatec.myapplication.data.local.entity.Contact
+import com.altatec.myapplication.ui.theme.AppTheme
 import com.altatec.myapplication.ui.viewmodel.HomeViewModel
 import com.altatec.myapplication.utils.CameraUtils
 import com.altatec.myapplication.utils.LocationUtils
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapType
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -80,8 +104,11 @@ fun HomeScreen(
     var phoneSuppText by remember { mutableStateOf("") }
     var hobby by remember { mutableStateOf("") }
     val hobbySuppText by remember { mutableStateOf("Optional") }
+    val focusManager = LocalFocusManager.current
 
     var showDatePicker by remember { mutableStateOf(false) }
+    var showMapsInfo by remember { mutableStateOf(false) }
+    var reverseGeolocation by remember { mutableStateOf("") }
 
     val location = homeViewModel.location.value
 
@@ -144,7 +171,7 @@ fun HomeScreen(
         return bitmap
     }
 
-    val defaultDrawable = ContextCompat.getDrawable(context, R.drawable.baseline_person_24)
+    val defaultDrawable = ContextCompat.getDrawable(context, R.drawable.baseline_person_72)
     val defaultBitmap = defaultDrawable?.let { drawableToBitmap(it) } ?: Bitmap.createBitmap(
         1,
         1,
@@ -200,7 +227,7 @@ fun HomeScreen(
 
     fun getAddress() {
         locationUtils.requestLocationUpdates(homeViewModel)
-        address = location?.let {
+        reverseGeolocation = location?.let {
             locationUtils.reverseGeocodeLocation(location)
         } ?: "Address not found"
     }
@@ -366,6 +393,7 @@ fun HomeScreen(
                     onClick = {
                         if (locationUtils.hasLocationPermission(context)) {
                             getAddress()
+                            showMapsInfo = true
                         } else {
                             requestLocationPermissionLauncher.launch(
                                 arrayOf(
@@ -473,6 +501,7 @@ fun HomeScreen(
                     wasPhotoTaken = false
                     photoBitmap = defaultBitmap
                     photoPreview = defaultBitmap.asImageBitmap()
+                    focusManager.clearFocus()
                 } catch (e: Exception) {
                     toastMessage = "Something went wrong"
                 }
@@ -495,6 +524,13 @@ fun HomeScreen(
             onDismiss = {
                 showDatePicker = false
             }
+        )
+    }
+    if (showMapsInfo) {
+        MapsInfoDialog(
+            location = reverseGeolocation,
+            onDismiss = { showMapsInfo = false },
+            onAccept = { address = it }
         )
     }
 }
@@ -524,5 +560,142 @@ fun DatePickerModal(
         }
     ) {
         DatePicker(state = datePickerState)
+    }
+}
+
+@Composable
+fun MapsInfoDialog(
+    location: String,
+    onDismiss: () -> Unit,
+    onAccept: (String) -> Unit
+) {
+
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.maps))
+    var address by remember { mutableStateOf(location) }
+
+    Dialog(
+        onDismissRequest = onDismiss
+    ) {
+        Card(
+            modifier = Modifier
+                .width(400.dp)
+                .wrapContentHeight(),
+            elevation = CardDefaults.cardElevation(8.dp),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.primary),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End
+            ) {
+                Text(
+                    text = "Address Info",
+                    modifier = Modifier
+                        .padding(end = 55.dp),
+                    color = Color.Black,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                IconButton(
+                    onClick = onDismiss
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Clear,
+                        contentDescription = "Cancel",
+                        tint = Color.Black
+                    )
+                }
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                LottieAnimation(
+                    composition = composition,
+                    modifier = Modifier.size(160.dp),
+                )
+                Text("We have found that your current address based on your location is:")
+                OutlinedTextField(
+                    value = address,
+                    onValueChange = { newText ->
+                        address = newText
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    label = {
+                        Text(text = "Address")
+                    },
+                    trailingIcon = {
+                        IconButton(
+                            onClick = {
+                                //TODO Open GoogleMap composable
+                            }
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_map_24),
+                                contentDescription = "Open Google Maps"
+                            )
+                        }
+                    },
+                    supportingText = {
+                        Text(text = "You can edit this field or click the icon to open Google Maps")
+                    },
+                    maxLines = 1
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    Button(
+                        onClick = { onDismiss() }
+                    ) {
+                        Text("Cancel")
+                    }
+                    Button(
+                        onClick = {
+                            onAccept(address)
+                            onDismiss()
+                        }
+                    ) {
+                        Text("Accept")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun MyGoogleMaps(location: LatLng) {
+
+    val properties by remember {
+        mutableStateOf(
+            MapProperties(
+                isMyLocationEnabled = true,
+                mapType = MapType.SATELLITE
+            )
+        )
+    }
+
+    val location = LatLng(0.0, 0.0)
+
+    GoogleMap(
+        modifier = Modifier
+            .fillMaxSize(),
+        properties = properties
+    )
+}
+
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun MapsDialogPrev() {
+    AppTheme {
+        MapsInfoDialog("GeorReverse Address", {}, {})
     }
 }
